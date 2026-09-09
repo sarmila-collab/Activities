@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leave Approval Automation — Flowchart Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ECEEE8;
+    --panel:#FFFFFF;
+    --ink:#22291F;
+    --ink-soft:#5A6152;
+    --line:#D6D9CD;
+    --line-strong:#B7BCA9;
+    --gold:#B8863B;
+    --gold-bg:#F6EBD8;
+    --teal:#2F6F5E;
+    --teal-bg:#E1EFEA;
+    --rust:#A6503B;
+    --rust-bg:#F3E4DE;
+    --wrong:#B24444;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    padding:32px 16px 80px;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+  header{margin-bottom:28px;}
+  .eyebrow{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:0 0 6px;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:32px;
+    margin:0 0 10px;
+    line-height:1.15;
+  }
+  .sub{
+    font-size:15px;
+    color:var(--ink-soft);
+    max-width:640px;
+    line-height:1.55;
+    margin:0;
+  }
+  .credit{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:10px 0 0;
+    font-style:italic;
+  }
+  .scoreboard{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin:22px 0 30px;
+    flex-wrap:wrap;
+  }
+  .score-pill{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:8px 18px;
+    font-size:14px;
+    font-weight:500;
+  }
+  .score-pill span{color:var(--teal);font-weight:600;}
+  button.reset{
+    border:1px solid var(--line-strong);
+    background:transparent;
+    color:var(--ink);
+    padding:8px 16px;
+    border-radius:999px;
+    font-size:13px;
+    font-family:'Inter',sans-serif;
+    cursor:pointer;
+  }
+  button.reset:hover{background:var(--panel);}
+
+  .layout{
+    display:grid;
+    grid-template-columns:220px 1fr;
+    gap:28px;
+  }
+  @media (max-width:760px){
+    .layout{grid-template-columns:1fr;}
+  }
+
+  .tray{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px;
+    height:fit-content;
+    position:sticky;
+    top:16px;
+  }
+  .tray h2{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:15px;
+    margin:0 0 4px;
+  }
+  .tray p{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:0 0 14px;
+    line-height:1.5;
+  }
+  .tray-cards{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    min-height:40px;
+  }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line-strong);
+    border-radius:10px;
+    padding:11px 13px;
+    font-size:13.5px;
+    font-weight:500;
+    line-height:1.35;
+    cursor:grab;
+    user-select:none;
+    touch-action:none;
+    transition:box-shadow .15s ease, transform .1s ease;
+  }
+  .card.condition{
+    background:var(--gold-bg);
+    border-color:#DEBE83;
+    color:#6B4C1D;
+    text-align:center;
+    font-size:12.5px;
+  }
+  .card:active{cursor:grabbing;}
+  .card.dragging{
+    box-shadow:0 8px 20px rgba(0,0,0,.15);
+    z-index:50;
+    position:fixed;
+    pointer-events:none;
+  }
+  .card.placed{
+    cursor:default;
+  }
+  .card.shake{
+    animation:shake .3s ease;
+  }
+  @keyframes shake{
+    0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-6px);}
+    75%{transform:translateX(6px);}
+  }
+
+  .flow{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:28px 24px 34px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .anchor{
+    background:var(--bg);
+    border:1px solid var(--line-strong);
+    border-radius:999px;
+    padding:8px 22px;
+    font-size:13px;
+    font-weight:500;
+    color:var(--ink-soft);
+  }
+  .arrow{
+    width:2px;
+    height:22px;
+    background:var(--line-strong);
+    position:relative;
+  }
+  .arrow::after{
+    content:'';
+    position:absolute;
+    bottom:-1px;
+    left:50%;
+    transform:translateX(-50%);
+    border-left:5px solid transparent;
+    border-right:5px solid transparent;
+    border-top:7px solid var(--line-strong);
+  }
+
+  .slot{
+    width:260px;
+    min-height:52px;
+    border:1.5px dashed var(--line-strong);
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:10px 14px;
+    text-align:center;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .slot.over{
+    background:var(--teal-bg);
+    border-color:var(--teal);
+  }
+  .slot.filled{
+    border-style:solid;
+    padding:0;
+  }
+  .slot.filled .card{
+    width:100%;
+    border:none;
+    border-radius:10px;
+    background:var(--teal-bg);
+    color:#1E4B3E;
+  }
+  .slot.decision{
+    width:230px;
+    min-height:80px;
+    border-radius:16px;
+    border-color:var(--gold);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+  }
+  .slot.decision::before{
+    content:'decision';
+    position:absolute;
+    top:-9px;
+    left:14px;
+    background:var(--panel);
+    padding:0 6px;
+    font-size:10.5px;
+    letter-spacing:.02em;
+    color:var(--gold);
+  }
+  .slot.decision.filled{
+    background:var(--gold-bg);
+  }
+  .slot.decision.filled .card{
+    background:transparent;
+    color:#6B4C1D;
+  }
+  .slot.decision.over{
+    background:var(--gold-bg);
+    border-color:var(--gold);
+  }
+
+  .branch-row{
+    display:flex;
+    gap:60px;
+    margin-top:6px;
+  }
+  .branch{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:0;
+  }
+  .branch-label{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-bottom:4px;
+  }
+  .cond-slot{
+    width:150px;
+    min-height:34px;
+    border:1.5px dashed var(--line-strong);
+    border-radius:999px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    padding:4px 10px;
+    margin-bottom:6px;
+    color:var(--ink-soft);
+  }
+  .cond-slot.over{background:var(--gold-bg);border-color:var(--gold);}
+  .cond-slot.filled{border-style:solid;padding:0;}
+  .cond-slot.filled .card{width:100%;border:none;border-radius:999px;padding:6px 10px;}
+  .branch .slot{width:200px;}
+  .branch.yes .slot.filled .card{background:var(--teal-bg);color:#1E4B3E;}
+  .branch.no .slot.filled .card{background:var(--rust-bg);color:#6B2A1B;}
+
+  .merge-note{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin:14px 0 -4px;
+    text-align:center;
+    max-width:300px;
+  }
+
+  .success-banner{
+    display:none;
+    margin-top:26px;
+    background:var(--teal-bg);
+    border:1px solid var(--teal);
+    border-radius:12px;
+    padding:18px 22px;
+    max-width:520px;
+    text-align:left;
+  }
+  .success-banner.show{display:block;}
+  .success-banner h3{
+    font-family:'Fraunces',serif;
+    font-size:17px;
+    margin:0 0 8px;
+    color:#1E4B3E;
+  }
+  .success-banner p{
+    font-size:13.5px;
+    color:#2B4A40;
+    line-height:1.6;
+    margin:0 0 10px;
+  }
+  .success-banner ul{
+    margin:0;
+    padding-left:18px;
+    font-size:13px;
+    color:#2B4A40;
+    line-height:1.7;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Business process automation — case study exercise</p>
+    <h1>Build the leave approval flowchart</h1>
+    <p class="sub">Drag each activity card from the tray into its correct place in the flow. Notice how the flow splits at the decision point and joins back together before the last two steps.</p>
+    <p class="credit">Dr. Sarmila, AP/AIML, Karunya Institute of Technology and Sciences</p>
+  </header>
+
+  <div class="scoreboard">
+    <div class="score-pill">Placed: <span id="score">0</span> / 8</div>
+    <button class="reset" id="resetBtn">Reset game</button>
+  </div>
+
+  <div class="layout">
+    <div class="tray">
+      <h2>Activity cards</h2>
+      <p>Drag a card onto the matching dashed slot in the flowchart.</p>
+      <div class="tray-cards" id="tray"></div>
+    </div>
+
+    <div class="flow" id="flow">
+      <div class="anchor">Start</div>
+      <div class="arrow"></div>
+      <div class="slot" data-slot="read"></div>
+      <div class="arrow"></div>
+      <div class="slot decision" data-slot="check"></div>
+      <div class="arrow"></div>
+      <div class="branch-row">
+        <div class="branch yes">
+          <div class="branch-label">left branch</div>
+          <div class="cond-slot" data-slot="cond-yes"></div>
+          <div class="slot" data-slot="approve"></div>
+        </div>
+        <div class="branch no">
+          <div class="branch-label">right branch</div>
+          <div class="cond-slot" data-slot="cond-no"></div>
+          <div class="slot" data-slot="forward"></div>
+        </div>
+      </div>
+      <div class="merge-note">both branches join back into a single flow</div>
+      <div class="arrow"></div>
+      <div class="slot" data-slot="notify"></div>
+      <div class="arrow"></div>
+      <div class="slot" data-slot="update"></div>
+      <div class="arrow"></div>
+      <div class="anchor">End</div>
+
+      <div class="success-banner" id="successBanner">
+        <h3>Flow complete</h3>
+        <p>Here's the recap for discussion:</p>
+        <ul>
+          <li><strong>Decision point:</strong> checking the number of leave days.</li>
+          <li><strong>Control flow:</strong> sequential steps, with a conditional branch that rejoins before the last two activities.</li>
+          <li><strong>Sequence:</strong> read request → check days → approve or forward → notify → update database.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const cards = [
+  { id:'read',     text:'Read the request',            type:'activity' },
+  { id:'check',    text:'Check number of leave days',   type:'activity' },
+  { id:'cond-yes', text:'≤ 3 days',                      type:'condition' },
+  { id:'cond-no',  text:'> 3 days',                      type:'condition' },
+  { id:'approve',  text:'Approve automatically',         type:'activity' },
+  { id:'forward',  text:'Forward to manager',            type:'activity' },
+  { id:'notify',   text:'Send notification',             type:'activity' },
+  { id:'update',   text:'Update leave database',         type:'activity' },
+];
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+const tray = document.getElementById('tray');
+const scoreEl = document.getElementById('score');
+const successBanner = document.getElementById('successBanner');
+let placedCount = 0;
+
+function buildTray(){
+  tray.innerHTML = '';
+  successBanner.classList.remove('show');
+  placedCount = 0;
+  scoreEl.textContent = '0';
+  document.querySelectorAll('.slot, .cond-slot').forEach(s=>{
+    s.classList.remove('filled','over');
+    s.innerHTML = '';
+  });
+  const order = shuffle(cards);
+  order.forEach(c=>{
+    const el = document.createElement('div');
+    el.className = 'card' + (c.type==='condition' ? ' condition' : '');
+    el.textContent = c.text;
+    el.dataset.id = c.id;
+    el.setAttribute('tabindex','0');
+    attachDrag(el);
+    tray.appendChild(el);
+  });
+}
+
+function getSlotFor(id){
+  return document.querySelector('[data-slot="'+id+'"]');
+}
+
+function attachDrag(card){
+  card.addEventListener('pointerdown', (e)=>{
+    if(card.classList.contains('placed')) return;
+    e.preventDefault();
+    const rect = card.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+    const placeholder = document.createElement('div');
+    placeholder.style.width = rect.width+'px';
+    placeholder.style.height = rect.height+'px';
+    placeholder.style.flexShrink = '0';
+    card.parentNode.insertBefore(placeholder, card);
+
+    card.classList.add('dragging');
+    card.style.width = rect.width+'px';
+    card.style.left = rect.left+'px';
+    card.style.top = rect.top+'px';
+    document.body.appendChild(card);
+    card.setPointerCapture(e.pointerId);
+
+    let lastOver = null;
+
+    function move(ev){
+      card.style.left = (ev.clientX - offsetX)+'px';
+      card.style.top = (ev.clientY - offsetY)+'px';
+      card.style.pointerEvents = 'none';
+      const under = document.elementFromPoint(ev.clientX, ev.clientY);
+      card.style.pointerEvents = '';
+      const slotUnder = under ? under.closest('.slot[data-slot], .cond-slot[data-slot]') : null;
+      if(lastOver && lastOver !== slotUnder) lastOver.classList.remove('over');
+      if(slotUnder && !slotUnder.classList.contains('filled')){
+        slotUnder.classList.add('over');
+        lastOver = slotUnder;
+      } else {
+        lastOver = null;
+      }
+    }
+
+    function up(ev){
+      document.removeEventListener('pointermove', move);
+      document.removeEventListener('pointerup', up);
+      card.classList.remove('dragging');
+      card.style.position = '';
+      card.style.left = '';
+      card.style.top = '';
+      card.style.width = '';
+      if(lastOver) lastOver.classList.remove('over');
+
+      card.style.pointerEvents = 'none';
+      const under = document.elementFromPoint(ev.clientX, ev.clientY);
+      card.style.pointerEvents = '';
+      const slotUnder = under ? under.closest('.slot[data-slot], .cond-slot[data-slot]') : null;
+
+      if(slotUnder && !slotUnder.classList.contains('filled') && slotUnder.dataset.slot === card.dataset.id){
+        placeholder.remove();
+        slotUnder.appendChild(card);
+        slotUnder.classList.add('filled');
+        card.classList.add('placed');
+        placedCount++;
+        scoreEl.textContent = placedCount;
+        if(placedCount === cards.length){
+          successBanner.classList.add('show');
+        }
+      } else {
+        placeholder.parentNode.insertBefore(card, placeholder);
+        placeholder.remove();
+        if(slotUnder && slotUnder.dataset.slot !== card.dataset.id){
+          card.classList.add('shake');
+          setTimeout(()=>card.classList.remove('shake'), 300);
+        }
+      }
+    }
+
+    document.addEventListener('pointermove', move);
+    document.addEventListener('pointerup', up);
+  });
+}
+
+document.getElementById('resetBtn').addEventListener('click', buildTray);
+buildTray();
+</script>
+</body>
+</html>
